@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliente MFA</title>
+</head>
+<body>
+    <h2>Práctica MFA</h2>
+    
+    <!-- Aquí mostraremos el QR que nos manda Node.js -->
+    <img id="qr-imagen" src="" alt="Generando QR..." style="max-width: 200px; display: block; margin-bottom: 20px;">
+
+    <!-- Input para meter el código del celular -->
+    <input id="token" placeholder="Ingresa el token TOTP" maxlength="6" />
+    <button onclick="validar()">Validar Token</button>
+
+    <p id="resultado"></p>
+
+    <script>
+      // 1. Nada más abrir la página, le pedimos el QR a Node.js
+      async function cargarQR() {
+        const respuesta = await fetch('http://localhost:4000/generate');
+        const data = await respuesta.json();
+        document.getElementById('qr-imagen').src = data.qr;
+      }
+
+      // 2. Función para enviar el token a Node.js y validarlo
+      async function validar() {
+        const token = document.getElementById('token').value;
+
+        const respuesta = await fetch('http://localhost:4000/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await respuesta.json();
+
+        document.getElementById('resultado').innerText =
+          data.valid ? "✅ Token válido" : "❌ Token inválido";
+      }
+
+      // Ejecutar la carga del QR al inicio
+      cargarQR();
+    </script>
+</body>
+</html>
